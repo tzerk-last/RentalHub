@@ -1,0 +1,71 @@
+@model RentalHub.Models.Reservation
+
+@{
+    ViewData["Title"] = "Confirmar pago";
+    var nights = (int)ViewBag.Nights;
+    var total  = (decimal)ViewBag.Total;
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+
+                    <h3 class="mb-4">Resumen de reserva</h3>
+
+                    <table class="table table-borderless">
+                        <tr>
+                            <td class="text-muted">Inmueble</td>
+                            <td class="fw-bold">@Model.Property.Title</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Ciudad</td>
+                            <td>@Model.Property.City</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Check-in</td>
+                            <td>@Model.CheckIn.ToString("dd/MM/yyyy") a las 2:00 PM</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Check-out</td>
+                            <td>@Model.CheckOut.ToString("dd/MM/yyyy") a las 12:00 PM</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Noches</td>
+                            <td>@nights</td>
+                        </tr>
+                        <tr class="border-top">
+                            <td class="text-muted fw-bold">Total</td>
+                            <td class="fw-bold text-success fs-5">@total.ToString("C")</td>
+                        </tr>
+                    </table>
+
+                    <div class="alert alert-warning py-2 small">
+                        Pago simulado — no se realizara ningun cobro real.
+                    </div>
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["Error"]</div>
+                    }
+
+                    <form asp-action="ConfirmPayment" method="post">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn btn-success w-100 py-2">
+                            Confirmar pago
+                        </button>
+                    </form>
+
+                    <a asp-controller="Home" asp-action="Detail" asp-route-id="@Model.PropertyId"
+                       class="btn btn-outline-secondary w-100 mt-2">
+                        Cancelar
+                    </a>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

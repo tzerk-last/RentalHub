@@ -1,0 +1,63 @@
+@model RentalHub.Models.KycVerification
+
+@{
+    ViewData["Title"] = "Verificacion de identidad";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+
+            <h2 class="mb-4">Verificacion de identidad</h2>
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">@TempData["Success"]</div>
+            }
+
+            @if (Model == null)
+            {
+                <div class="alert alert-warning">
+                    Para publicar inmuebles debes verificar tu identidad primero.
+                </div>
+                <a asp-action="Upload" class="btn btn-primary">Verificar ahora</a>
+            }
+            else if (Model.Status == "Approved")
+            {
+                <div class="card shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="text-success mb-3" style="font-size:48px">&#10003;</div>
+                        <h4 class="text-success">Identidad verificada</h4>
+                        <p class="text-muted">Tu cuenta esta habilitada para publicar inmuebles.</p>
+                        <a asp-area="Owner" asp-controller="PropertyManagement" asp-action="Index"
+                           class="btn btn-primary mt-2">
+                            Ir a mis inmuebles
+                        </a>
+                    </div>
+                </div>
+            }
+            else if (Model.Status == "Pending")
+            {
+                <div class="card shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="text-warning mb-3" style="font-size:48px">&#9679;</div>
+                        <h4 class="text-warning">En revision</h4>
+                        <p class="text-muted">Tus documentos estan siendo revisados.</p>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="text-danger mb-3" style="font-size:48px">&#10007;</div>
+                        <h4 class="text-danger">Verificacion rechazada</h4>
+                        <p class="text-muted">Tus documentos no pudieron ser verificados.</p>
+                        <a asp-action="Upload" class="btn btn-danger mt-2">Reintentar</a>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>

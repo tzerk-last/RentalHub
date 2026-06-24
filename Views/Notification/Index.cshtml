@@ -1,0 +1,56 @@
+@model IEnumerable<RentalHub.Models.Notification>
+
+@{
+    ViewData["Title"] = "Notificaciones";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Notificaciones</h2>
+        @if (Model.Any(n => !n.IsRead))
+        {
+            <form asp-action="MarkAllRead" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-outline-secondary btn-sm">
+                    Marcar todas como leidas
+                </button>
+            </form>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <p class="text-muted">No tienes notificaciones.</p>
+    }
+    else
+    {
+        <div class="list-group">
+            @foreach (var n in Model)
+            {
+                <div class="list-group-item @(!n.IsRead ? "list-group-item-light border-start border-primary border-3" : "")">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1 @(!n.IsRead ? "fw-bold" : "")">@n.Title</h6>
+                            <p class="mb-1 text-muted">@n.Message</p>
+                            <small class="text-muted">@n.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                        </div>
+                        @if (!n.IsRead)
+                        {
+                            <form asp-action="MarkRead" method="post" class="ms-3">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@n.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-primary">
+                                    Leida
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary ms-3">Leida</span>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

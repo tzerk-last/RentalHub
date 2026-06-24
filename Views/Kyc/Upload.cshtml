@@ -1,0 +1,51 @@
+@{
+    ViewData["Title"] = "Subir documentos";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+
+            <h2 class="mb-2">Verificacion de identidad</h2>
+            <p class="text-muted mb-4">
+                Para tu seguridad y la de los propietarios, necesitamos verificar tu identidad
+                antes de confirmar una reserva.
+            </p>
+
+            <form asp-action="Upload" method="post" enctype="multipart/form-data">
+
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Documento de identidad</h5>
+                        <p class="text-muted small">Cedula, pasaporte o documento oficial vigente.</p>
+                        <input type="file" name="document" class="form-control"
+                               accept="image/*,.pdf" capture="environment" required />
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Selfie con el documento</h5>
+                        <p class="text-muted small">
+                            Toma una foto sosteniedo tu documento al lado de tu cara.
+                        </p>
+                        <input type="file" name="selfie" class="form-control"
+                               accept="image/*" capture="user" required />
+                    </div>
+                </div>
+
+                <div class="alert alert-info small">
+                    Tus documentos seran eliminados de forma segura una vez completada la verificacion.
+                </div>
+
+                <button type="submit" class="btn btn-success w-100">
+                    Enviar para verificacion
+                </button>
+
+                <a asp-action="Index" class="btn btn-outline-secondary w-100 mt-2">Cancelar</a>
+
+            </form>
+
+        </div>
+    </div>
+</div>

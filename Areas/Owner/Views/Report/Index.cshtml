@@ -1,0 +1,62 @@
+@{
+    ViewData["Title"] = "Reportes";
+    var properties = ViewBag.Properties as List<RentalHub.Models.Property>;
+}
+
+<div class="container py-4">
+
+    <h2 class="mb-4">Reportes Excel</h2>
+
+    <div class="row g-4">
+
+        <!-- Reporte completo -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Reporte completo</h5>
+                    <p class="text-muted">
+                        Exporta todas las reservas de todos tus inmuebles.
+                        Incluye huesped, fechas, precio y estado.
+                    </p>
+                    <a asp-action="Download" class="btn btn-success">
+                        Descargar reporte completo
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reporte por inmueble -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Reporte por inmueble</h5>
+                    <p class="text-muted">
+                        Filtra el reporte por un inmueble especifico.
+                    </p>
+                    @if (properties != null && properties.Any())
+                    {
+                        <form asp-action="Download" method="get">
+                            <div class="mb-3">
+                                <select name="propertyId" class="form-select">
+                                    @foreach (var p in properties)
+                                    {
+                                        <option value="@p.Id">@p.Title — @p.City</option>
+                                    }
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                Descargar por inmueble
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <p class="text-muted small">No tienes inmuebles registrados.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>

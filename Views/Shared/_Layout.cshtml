@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - RentalHub</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
+            RentalHub
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+
+                @if (User.IsInRole("Owner"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="Owner" asp-controller="Dashboard" asp-action="Index">
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="Owner" asp-controller="PropertyManagement" asp-action="Index">
+                            Mis inmuebles
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="Owner" asp-controller="Report" asp-action="Index">
+                            Reportes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="Owner" asp-controller="Kyc" asp-action="Index">
+                            Verificacion
+                        </a>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                            Inmuebles
+                        </a>
+                    </li>
+                    @if (User.IsInRole("User"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Wishlist" asp-action="Index">
+                                Favoritos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Reservation" asp-action="MyReservations">
+                                Mis reservas
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Kyc" asp-action="Index">
+                                Verificacion
+                            </a>
+                        </li>
+                    }
+                }
+
+            </ul>
+            <ul class="navbar-nav ms-auto align-items-center">
+                @if (User.Identity!.IsAuthenticated)
+                {
+                    <li class="nav-item me-2">
+                        <a class="nav-link position-relative"
+                           asp-area="" asp-controller="Notification" asp-action="Index">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                 fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2z"/>
+                                <path d="M8 1.918l-.797.161A4.002 4.002 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5.002 5.002 0 0 1 13 6c0 .88.32 4.2 1.22 6z"/>
+                            </svg>
+                            <span id="badge-notif"
+                                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                  style="display:none;font-size:10px"></span>
+                        </a>
+                    </li>
+                    <li class="nav-item d-flex align-items-center">
+                        <span class="nav-link text-light opacity-75">@User.Identity.Name</span>
+                    </li>
+                    <li class="nav-item">
+                        <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-outline-light btn-sm">
+                                Cerrar sesion
+                            </button>
+                        </form>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Login">
+                            Ingresar
+                        </a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <a class="btn btn-primary btn-sm" asp-area="" asp-controller="Account" asp-action="Register">
+                            Registrarse
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="pb-5">
+    @if (TempData["Success"] != null)
+    {
+        <div class="container mt-3">
+            <div class="alert alert-success alert-dismissible fade show">
+                @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="container mt-3">
+            <div class="alert alert-danger alert-dismissible fade show">
+                @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+    }
+    @RenderBody()
+</main>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+@if (User.Identity!.IsAuthenticated)
+{
+    <script>
+        async function checkNotifications() {
+            try {
+                const res   = await fetch('/Notification/UnreadCount');
+                const count = await res.json();
+                const badge = document.getElementById('badge-notif');
+                if (count > 0) {
+                    badge.textContent   = count > 9 ? '9+' : count;
+                    badge.style.display = 'inline';
+                } else {
+                    badge.style.display = 'none';
+                }
+            } catch {}
+        }
+        checkNotifications();
+        setInterval(checkNotifications, 30000);
+    </script>
+}
+
+</body>
+</html>

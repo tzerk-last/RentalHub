@@ -1,0 +1,167 @@
+@model RentalHub.ViewModels.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+    var periodo        = ViewBag.Periodo as string ?? "mes";
+    var tasaOcupacion  = (double)ViewBag.TasaOcupacion;
+    var ingresosPorMes = ViewBag.IngresosPorMes as IEnumerable<dynamic> ?? new List<dynamic>();
+}
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Panel del Propietario</h2>
+
+        <!-- Selector de periodo -->
+        <div class="btn-group">
+            <a asp-action="Index" asp-route-periodo="semana"
+               class="btn btn-sm @(periodo == "semana" ? "btn-dark" : "btn-outline-dark")">
+                Semana
+            </a>
+            <a asp-action="Index" asp-route-periodo="mes"
+               class="btn btn-sm @(periodo == "mes" ? "btn-dark" : "btn-outline-dark")">
+                Mes
+            </a>
+            <a asp-action="Index" asp-route-periodo="anio"
+               class="btn btn-sm @(periodo == "anio" ? "btn-dark" : "btn-outline-dark")">
+                Año
+            </a>
+            <a asp-action="Index" asp-route-periodo="todo"
+               class="btn btn-sm @(periodo == "todo" ? "btn-dark" : "btn-outline-dark")">
+                Todo
+            </a>
+        </div>
+    </div>
+
+    <!-- Tarjetas -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary h-100">
+                <div class="card-body">
+                    <h6 class="card-title">Propiedades</h6>
+                    <h2>@Model.TotalProperties</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success h-100">
+                <div class="card-body">
+                    <h6 class="card-title">Reservas</h6>
+                    <h2>@Model.TotalReservations</h2>
+                    <small>en el periodo</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-dark h-100">
+                <div class="card-body">
+                    <h6 class="card-title">Ingresos confirmados</h6>
+                    <h2>@Model.TotalRevenue.ToString("C")</h2>
+                    <small>en el periodo</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100" style="background:#17a2b8;color:white">
+                <div class="card-body">
+                    <h6 class="card-title">Tasa de ocupacion</h6>
+                    <h2>@tasaOcupacion%</h2>
+                    <div class="progress mt-2" style="height:6px">
+                        <div class="progress-bar bg-white" style="width:@tasaOcupacion%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grafico de ingresos -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Ingresos ultimos 6 meses</h5>
+            <canvas id="chartIngresos" height="80"></canvas>
+        </div>
+    </div>
+
+    <!-- Reservas recientes -->
+    <h5>Reservas recientes</h5>
+
+    @if (!Model.RecentReservations.Any())
+    {
+        <p class="text-muted">No hay reservas en este periodo.</p>
+    }
+    else
+    {
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Huesped</th>
+                    <th>Propiedad</th>
+                    <th>Check-in</th>
+                    <th>Check-out</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model.RecentReservations)
+                {
+                    <tr>
+                        <td>@r.GuestName</td>
+                        <td>@r.PropertyTitle</td>
+                        <td>@r.CheckIn.ToString("dd/MM/yyyy")</td>
+                        <td>@r.CheckOut.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            <span class="badge @(r.Status == "Confirmed" ? "bg-success" :
+                                                 r.Status == "Pending"   ? "bg-warning text-dark" :
+                                                                           "bg-secondary")">
+                                @r.Status
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <a asp-area="Owner" asp-controller="PropertyManagement" asp-action="Index"
+       class="btn btn-outline-primary mt-2">
+        Gestionar propiedades
+    </a>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var labels   = [@Html.Raw(string.Join(",", ingresosPorMes.Select(x => $"\"{x.Mes}\"")))];
+    var data     = [@Html.Raw(string.Join(",", ingresosPorMes.Select(x => x.Ingresos)))];
+
+    new Chart(document.getElementById('chartIngresos'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Ingresos',
+                data: data,
+                backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                borderColor: 'rgba(40, 167, 69, 1)',
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(v) {
+                            return '$' + v.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>

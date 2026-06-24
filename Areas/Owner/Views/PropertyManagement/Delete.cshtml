@@ -1,0 +1,8 @@
+@model RentalHub.Models.Property
+<h1>Eliminar Inmueble</h1>
+<p>¿Seguro que deseas eliminar <strong>@Model.Title</strong>?</p>
+<form asp-action="Delete" method="post">
+    <input asp-for="Id" type="hidden" />
+    <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>

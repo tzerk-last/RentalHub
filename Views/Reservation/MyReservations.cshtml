@@ -1,0 +1,64 @@
+@model IEnumerable<RentalHub.Models.Reservation>
+
+@{
+    ViewData["Title"] = "Mis reservas";
+}
+
+<div class="container py-4">
+    <h2 class="mb-4">Mis reservas</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <p class="text-muted">No tienes reservas todavia.</p>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Explorar inmuebles</a>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Inmueble</th>
+                        <th>Check-in</th>
+                        <th>Check-out</th>
+                        <th>Estado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model)
+                    {
+                        <tr>
+                            <td>@r.Property.Title</td>
+                            <td>@r.CheckIn.ToString("dd/MM/yyyy")</td>
+                            <td>@r.CheckOut.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                <span class="badge @(r.Status == "Confirmed" ? "bg-success" :
+                                                     r.Status == "Pending"   ? "bg-warning text-dark" :
+                                                                               "bg-secondary")">
+                                    @r.Status
+                                </span>
+                            </td>
+                            <td>
+                                @if (r.Status == ReservationStatus.Pending)
+                                {
+                                    <form asp-action="Cancel" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@r.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            Cancelar
+                                        </button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
