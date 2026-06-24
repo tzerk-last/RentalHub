@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RentalHub.Data;
 using RentalHub.Models;
+using RentalHub.ViewModels;
 
 namespace RentalHub.Areas.Owner.Controllers;
 
@@ -36,27 +37,23 @@ public class PropertyManagementController : Controller
 
     public async Task<IActionResult> Create()
     {
-        // Verificar KYC
         var userId = _userManager.GetUserId(User)!;
         var kyc    = await _context.KycVerifications
             .FirstOrDefaultAsync(k => k.UserId == userId);
-
         if (kyc == null || kyc.Status != "Approved")
         {
             TempData["Error"] = "Debes verificar tu identidad antes de publicar inmuebles.";
             return RedirectToAction("Index", "Kyc", new { area = "Owner" });
         }
-
-        return View();
+        return View(new PropertyViewModel());
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(Property property, List<IFormFile>? images)
+    public async Task<IActionResult> Create(PropertyViewModel vm)
     {
         var userId = _userManager.GetUserId(User)!;
         var kyc    = await _context.KycVerifications
             .FirstOrDefaultAsync(k => k.UserId == userId);
-
         if (kyc == null || kyc.Status != "Approved")
         {
             TempData["Error"] = "Debes verificar tu identidad antes de publicar inmuebles.";
@@ -64,16 +61,26 @@ public class PropertyManagementController : Controller
         }
 
         ModelState.Remove("Images");
-        ModelState.Remove("Reservations");
-        ModelState.Remove("OwnerId");
+        ModelState.Remove("ExistingImages");
+        if (!ModelState.IsValid) return View(vm);
 
-        if (!ModelState.IsValid) return View(property);
+        var property = new Property
+        {
+            Title         = vm.Title,
+            Description   = vm.Description,
+            City          = vm.City,
+            Address       = vm.Address,
+            PricePerNight = vm.PricePerNight,
+            MaxGuests     = vm.MaxGuests,
+            Bedrooms      = vm.Bedrooms,
+            Bathrooms     = vm.Bathrooms,
+            IsAvailable   = vm.IsAvailable,
+            OwnerId       = userId
+        };
 
-        property.OwnerId = userId;
         _context.Properties.Add(property);
         await _context.SaveChangesAsync();
-
-        await SaveImages(images, property.Id);
+        await SaveImages(vm.Images, property.Id);
 
         TempData["Success"] = "Inmueble creado exitosamente.";
         return RedirectToAction(nameof(Index));
@@ -87,25 +94,56 @@ public class PropertyManagementController : Controller
             .Include(p => p.Images)
             .FirstOrDefaultAsync(p => p.Id == id && p.OwnerId == ownerId);
         if (property == null) return NotFound();
-        return View(property);
+
+        var vm = new PropertyViewModel
+        {
+            Id             = property.Id,
+            Title          = property.Title,
+            Description    = property.Description,
+            City           = property.City,
+            Address        = property.Address,
+            PricePerNight  = property.PricePerNight,
+            MaxGuests      = property.MaxGuests,
+            Bedrooms       = property.Bedrooms,
+            Bathrooms      = property.Bathrooms,
+            IsAvailable    = property.IsAvailable,
+            ExistingImages = property.Images.ToList()
+        };
+
+        return View(vm);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Edit(int id, Property property, List<IFormFile>? images)
+    public async Task<IActionResult> Edit(int id, PropertyViewModel vm)
     {
-        if (id != property.Id) return BadRequest();
-
         ModelState.Remove("Images");
-        ModelState.Remove("Reservations");
-        ModelState.Remove("OwnerId");
+        ModelState.Remove("ExistingImages");
+        if (!ModelState.IsValid)
+        {
+            vm.ExistingImages = await _context.PropertyImages
+                .Where(i => i.PropertyId == id)
+                .ToListAsync();
+            return View(vm);
+        }
 
-        if (!ModelState.IsValid) return View(property);
+        var existing = await _context.Properties
+            .FirstOrDefaultAsync(p => p.Id == id);
+        if (existing == null) return NotFound();
 
-        property.OwnerId = _userManager.GetUserId(User)!;
-        _context.Properties.Update(property);
+        existing.Title         = vm.Title;
+        existing.Description   = vm.Description;
+        existing.City          = vm.City;
+        existing.Address       = vm.Address;
+        existing.PricePerNight = vm.PricePerNight;
+        existing.MaxGuests     = vm.MaxGuests;
+        existing.Bedrooms      = vm.Bedrooms;
+        existing.Bathrooms     = vm.Bathrooms;
+        existing.IsAvailable   = vm.IsAvailable;
+
         await _context.SaveChangesAsync();
 
-        await SaveImages(images, property.Id);
+        if (vm.Images != null && vm.Images.Any())
+            await SaveImages(vm.Images, id);
 
         TempData["Success"] = "Inmueble actualizado.";
         return RedirectToAction(nameof(Index));
@@ -169,7 +207,6 @@ public class PropertyManagementController : Controller
         foreach (var file in images)
         {
             if (file.Length == 0) continue;
-
             var ext     = Path.GetExtension(file.FileName).ToLower();
             var allowed = new[] { ".jpg", ".jpeg", ".png", ".webp" };
             if (!allowed.Contains(ext)) continue;
@@ -186,7 +223,6 @@ public class PropertyManagementController : Controller
                 ImageUrl   = $"/uploads/properties/{fileName}"
             });
         }
-
         await _context.SaveChangesAsync();
     }
 }

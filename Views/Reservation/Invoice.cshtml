@@ -1,0 +1,101 @@
+@model RentalHub.Models.Reservation
+
+@{
+    ViewData["Title"] = "Factura de reserva";
+    var nights = (int)ViewBag.Nights;
+    var total  = (decimal)ViewBag.Total;
+    var user   = ViewBag.User as RentalHub.Models.ApplicationUser;
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+
+            <div class="card shadow-sm" id="factura">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h2 class="fw-bold mb-0">RentalHub</h2>
+                            <small class="text-muted">Plataforma de arrendamiento</small>
+                        </div>
+                        <div class="text-end">
+                            <h5 class="fw-bold mb-0">Factura</h5>
+                            <small class="text-muted"># @Model.Id.ToString("D6")</small><br/>
+                            <small class="text-muted">@DateTime.UtcNow.ToString("dd/MM/yyyy")</small>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Huesped</h6>
+                            <p class="mb-0 fw-bold">@user?.FullName</p>
+                            <p class="mb-0 text-muted small">@user?.Email</p>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <h6 class="text-muted">Estado</h6>
+                            <span class="badge fs-6 @(Model.Status == "Confirmed" ? "bg-success" :
+                                                       Model.Status == "Pending"   ? "bg-warning text-dark" :
+                                                                                     "bg-secondary")">
+                                @Model.Status
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h6 class="fw-bold">@Model.Property.Title</h6>
+                            <p class="text-muted mb-0 small">@Model.Property.Address, @Model.Property.City</p>
+                        </div>
+                    </div>
+
+                    <table class="table table-borderless mb-0">
+                        <tr>
+                            <td class="text-muted">Check-in</td>
+                            <td class="fw-bold">@Model.CheckIn.ToString("dd/MM/yyyy") a las 2:00 PM</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Check-out</td>
+                            <td class="fw-bold">@Model.CheckOut.ToString("dd/MM/yyyy") a las 12:00 PM</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Noches</td>
+                            <td class="fw-bold">@nights</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Precio por noche</td>
+                            <td class="fw-bold">@Model.Property.PricePerNight.ToString("C")</td>
+                        </tr>
+                    </table>
+
+                    <hr />
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Total pagado</h5>
+                        <h4 class="fw-bold text-success mb-0">@total.ToString("C")</h4>
+                    </div>
+
+                    <hr />
+
+                    <p class="text-muted small text-center mb-0">
+                        Pago simulado procesado por RentalHub.
+                        Horario estandar: Check-in 2:00 PM / Check-out 12:00 PM.
+                    </p>
+
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-3 no-print">
+                <button onclick="window.print()" class="btn btn-primary">
+                    Imprimir / Guardar PDF
+                </button>
+                <a asp-action="MyReservations" class="btn btn-outline-secondary">
+                    Volver a mis reservas
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>

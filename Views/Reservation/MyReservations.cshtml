@@ -23,20 +23,26 @@
             <table class="table table-hover">
                 <thead class="table-light">
                     <tr>
+                        <th>#</th>
                         <th>Inmueble</th>
                         <th>Check-in</th>
                         <th>Check-out</th>
+                        <th>Total</th>
                         <th>Estado</th>
-                        <th></th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var r in Model)
                     {
+                        var nights = (r.CheckOut - r.CheckIn).Days;
+                        var total  = nights * r.Property.PricePerNight;
                         <tr>
-                            <td>@r.Property.Title</td>
-                            <td>@r.CheckIn.ToString("dd/MM/yyyy")</td>
-                            <td>@r.CheckOut.ToString("dd/MM/yyyy")</td>
+                            <td class="text-muted small">#@r.Id.ToString("D6")</td>
+                            <td>@r.Property.Title<br/><small class="text-muted">@r.Property.City</small></td>
+                            <td>@r.CheckIn.ToString("dd/MM/yyyy")<br/><small class="text-muted">2:00 PM</small></td>
+                            <td>@r.CheckOut.ToString("dd/MM/yyyy")<br/><small class="text-muted">12:00 PM</small></td>
+                            <td class="fw-bold text-success">@total.ToString("C")</td>
                             <td>
                                 <span class="badge @(r.Status == "Confirmed" ? "bg-success" :
                                                      r.Status == "Pending"   ? "bg-warning text-dark" :
@@ -45,15 +51,21 @@
                                 </span>
                             </td>
                             <td>
-                                @if (r.Status == ReservationStatus.Pending)
-                                {
-                                    <form asp-action="Cancel" method="post" class="d-inline">
-                                        <input type="hidden" name="id" value="@r.Id" />
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            Cancelar
-                                        </button>
-                                    </form>
-                                }
+                                <div class="d-flex gap-1">
+                                    <a asp-action="Invoice" asp-route-id="@r.Id"
+                                       class="btn btn-sm btn-outline-primary">
+                                        Factura
+                                    </a>
+                                    @if (r.Status == ReservationStatus.Pending)
+                                    {
+                                        <form asp-action="Cancel" method="post">
+                                            <input type="hidden" name="id" value="@r.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                Cancelar
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
                             </td>
                         </tr>
                     }

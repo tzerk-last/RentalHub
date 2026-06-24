@@ -113,7 +113,6 @@ public class ReservationController : Controller
         var nights = (reservation.CheckOut - reservation.CheckIn).Days;
         var total  = nights * reservation.Property.PricePerNight;
 
-        // Notificacion in-app al arrendatario
         _context.Notifications.Add(new Notification
         {
             UserId    = user.Id,
@@ -123,7 +122,6 @@ public class ReservationController : Controller
             CreatedAt = DateTime.UtcNow
         });
 
-        // Notificacion in-app al dueno
         _context.Notifications.Add(new Notification
         {
             UserId    = reservation.Property.OwnerId,
@@ -135,7 +133,6 @@ public class ReservationController : Controller
 
         await _context.SaveChangesAsync();
 
-        // Correo al arrendatario
         var body = $@"
             <h2>Reserva confirmada</h2>
             <p>Hola {user.FullName},</p>
@@ -174,6 +171,26 @@ public class ReservationController : Controller
             .OrderByDescending(r => r.CheckIn)
             .ToListAsync();
         return View(reservations);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Invoice(int id)
+    {
+        var userId = _userManager.GetUserId(User)!;
+        var user   = await _userManager.GetUserAsync(User);
+
+        var reservation = await _context.Reservations
+            .Include(r => r.Property)
+            .FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
+
+        if (reservation == null) return NotFound();
+
+        var nights = (reservation.CheckOut - reservation.CheckIn).Days;
+        ViewBag.Nights = nights;
+        ViewBag.Total  = nights * reservation.Property.PricePerNight;
+        ViewBag.User   = user;
+
+        return View(reservation);
     }
 
     [HttpPost]
