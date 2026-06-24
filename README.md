@@ -1,27 +1,33 @@
-## Arquitectura de la Solución
+# RentalHub
 
-RentalHub fue desarrollado utilizando ASP.NET Core MVC sobre .NET 10 siguiendo una separación clara de responsabilidades para facilitar el mantenimiento, escalabilidad y pruebas del sistema.
+Plataforma de alquiler de inmuebles desarrollada en ASP.NET Core MVC sobre .NET 10, diseñada para facilitar la gestión de reservas, validación de identidad (KYC), administración de propiedades y análisis de rendimiento para propietarios.
 
-### Capas Principales
+---
 
-#### Controllers
-Gestionan las solicitudes HTTP, validan entradas y coordinan la comunicación entre la interfaz de usuario y la lógica de negocio.
+## Tecnologías Utilizadas
 
-#### Services
-Contienen la lógica de negocio desacoplada mediante interfaces e implementaciones concretas.
+- .NET 10
+- ASP.NET Core MVC
+- Entity Framework Core
+- PostgreSQL
+- ASP.NET Core Identity
+- Docker
+- Docker Compose
+- ClosedXML
+- OpenAI GPT-4o Vision (opcional)
 
-#### Models
-Representan las entidades persistentes del dominio utilizadas por Entity Framework Core.
+---
 
-#### ViewModels
-Modelos específicos para la presentación de datos entre controladores y vistas Razor.
+## Requisitos Previos
 
-#### Data
-Contiene la configuración del contexto de base de datos y la integración con Entity Framework Core.
+Antes de ejecutar la aplicación asegúrese de tener instalado:
 
-#### Areas
-Se utilizó el área `Owner` para encapsular las funcionalidades exclusivas de los propietarios, manteniendo una separación clara respecto a las funcionalidades del huésped.
+- Docker
+- Docker Compose
 
+No es necesario instalar PostgreSQL ni .NET SDK para ejecutar la solución mediante contenedores.
+
+---
 
 ## Docker
 
@@ -30,81 +36,91 @@ Se utilizó el área `Owner` para encapsular las funcionalidades exclusivas de l
 ```bash
 docker compose up --build
 ```
+
+### Ejecutar en segundo plano
+
+```bash
+docker compose up -d --build
+```
+
+### Detener los servicios
+
+```bash
+docker compose down
+```
+
+### Eliminar contenedores y volúmenes
+
+```bash
+docker compose down -v
+```
+
+### Acceso a la aplicación
+
+Una vez iniciada la aplicación:
+
+```text
+http://localhost:8080
+```
+
+### Inicialización automática
+
+Al iniciar el proyecto:
+
+- Se crea la base de datos PostgreSQL.
+- Se aplican las migraciones de Entity Framework Core.
+- Se crean las tablas necesarias para el funcionamiento de la aplicación.
+
 ---
 
-## 📂 Estructura del Proyecto
+## Arquitectura de la Solución
+
+RentalHub fue desarrollado utilizando ASP.NET Core MVC sobre .NET 10 siguiendo una separación clara de responsabilidades para facilitar el mantenimiento, escalabilidad y pruebas del sistema.
+
+### Capas Principales
+
+#### Controllers
+
+Gestionan las solicitudes HTTP, validan entradas y coordinan la comunicación entre la interfaz de usuario y la lógica de negocio.
+
+#### Services
+
+Contienen la lógica de negocio desacoplada mediante interfaces e implementaciones concretas.
+
+#### Models
+
+Representan las entidades persistentes del dominio utilizadas por Entity Framework Core.
+
+#### ViewModels
+
+Modelos específicos para la presentación de datos entre controladores y vistas Razor.
+
+#### Data
+
+Contiene la configuración del contexto de base de datos y la integración con Entity Framework Core.
+
+#### Areas
+
+Se utilizó el área `Owner` para encapsular las funcionalidades exclusivas de los propietarios, manteniendo una separación clara respecto a las funcionalidades del huésped.
+
+---
+
+## Estructura del Proyecto
 
 ```text
 RentalHub/
 ├── Areas/
 │   └── Owner/
-│       ├── Controllers/
-│       │   ├── DashboardController.cs
-│       │   ├── KycController.cs
-│       │   ├── PropertyManagementController.cs
-│       │   └── ReportController.cs
-│       │
-│       └── Views/
-│           ├── Dashboard/
-│           ├── Kyc/
-│           ├── PropertyManagement/
-│           ├── Report/
-│           ├── _ViewImports.cshtml
-│           └── _ViewStart.cshtml
-│
 ├── Constants/
-│   ├── ReservationStatus.cs
-│   └── Roles.cs
-│
 ├── Controllers/
-│   ├── AccountController.cs
-│   ├── HomeController.cs
-│   ├── KycController.cs
-│   ├── NotificationController.cs
-│   ├── ReservationController.cs
-│   └── WishlistController.cs
-│
 ├── Data/
-│   └── ApplicationDbContext.cs
-│
 ├── Migrations/
-│
 ├── Models/
-│   ├── ApplicationUser.cs
-│   ├── KycVerification.cs
-│   ├── Notification.cs
-│   ├── Payment.cs
-│   ├── Property.cs
-│   ├── PropertyImage.cs
-│   ├── Reservation.cs
-│   └── Wishlist.cs
-│
 ├── Services/
 │   ├── Interfaces/
-│   │   ├── IEmailService.cs
-│   │   └── IKycService.cs
-│   │
 │   └── Implementations/
-│       ├── EmailService.cs
-│       ├── KycService.cs
-│       └── ReminderService.cs
-│
 ├── ViewModels/
-│   ├── DashboardViewModel.cs
-│   ├── LoginViewModel.cs
-│   └── RegisterViewModel.cs
-│
 ├── Views/
-│   ├── Account/
-│   ├── Home/
-│   ├── Kyc/
-│   ├── Notification/
-│   ├── Reservation/
-│   ├── Shared/
-│   ├── Wishlist/
-│   ├── _ViewImports.cshtml
-│   └── _ViewStart.cshtml
-│
 ├── wwwroot/
 ├── Properties/
 ├── Program.cs
@@ -135,17 +151,14 @@ Esto asegura uniformidad en la operación y simplifica la gestión de entradas y
 
 ### KYC Asistido por Inteligencia Artificial
 
-Se implementó un proceso de validación de identidad que solicita:
-
-- Documento de identidad.
-- Selfie sosteniendo el documento.
+Se implementó un proceso de validación de identidad mediante captura de documento y fotografía del usuario.
 
 El sistema puede operar en:
 
-- Modo simulado (sin API Key).
+- Modo simulado.
 - Modo integrado con OpenAI GPT-4o Vision.
 
-La verificación es obligatoria antes de realizar reservas o publicar inmuebles.
+La validación forma parte del flujo de seguridad de la plataforma.
 
 ### Sistema Omnicanal de Notificaciones
 
@@ -170,8 +183,6 @@ Los propietarios disponen de un panel de control que centraliza:
 - Ingresos generados.
 - Tasa de ocupación.
 - Historial de actividad reciente.
-
-Esto facilita la toma de decisiones basada en datos.
 
 ### Exportación de Reportes
 
